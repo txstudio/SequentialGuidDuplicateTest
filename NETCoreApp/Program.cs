@@ -1,6 +1,7 @@
 ﻿using SequentialGuid;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,6 +10,8 @@ namespace NETCoreApp
     class Program
     {
         const string rootPath = "../../../files";
+        const int taskNumber = 20;
+        const int guidValueCount = 500;
 
         static void Main(string[] args)
         {
@@ -24,15 +27,20 @@ namespace NETCoreApp
             foreach (var _filePath in _files)
                 File.Delete(_filePath);
 
-            for (int i = 0; i < 50; i++)
+            Stopwatch _watch = new Stopwatch();
+
+            _watch.Start();
+
+            for (int i = 0; i < taskNumber; i++)
             {
                 Task _task = new Task(() => {
                     var _fileName = $"{Guid.NewGuid()}.guid";
                     var _fullPath = Path.Combine(rootPath, _fileName);
 
-                    for (int i = 0; i < 2500; i++)
+                    for (int i = 0; i < guidValueCount; i++)
                     {
                         var _guidValue = SequentialGuidGenerator.Instance.NewGuid();
+                        //var _guidValue = Guid.NewGuid();
                         var _content = $"{_guidValue}\n";
 
                         File.AppendAllText(_fullPath, _content);
@@ -43,6 +51,8 @@ namespace NETCoreApp
             }
 
             Task.WaitAll(_tasks.ToArray());
+
+            _watch.Stop();
 
             _files = Directory.GetFiles(rootPath, "*.guid");
 
@@ -65,11 +75,12 @@ namespace NETCoreApp
                 }
             }
 
-            foreach (var _item in _dictionary)
-                Console.WriteLine(_item.Key);
+            //foreach (var _item in _dictionary)
+            //    Console.WriteLine(_item.Key);
 
             Console.WriteLine($"{_dictionary.Count} SequentialGuids Created");
             Console.WriteLine("Not duplicate Guid found !");
+            Console.WriteLine($"Elapsed Time: {_watch.Elapsed}");
             Console.WriteLine();
 
             Console.WriteLine("press any key to exit");
